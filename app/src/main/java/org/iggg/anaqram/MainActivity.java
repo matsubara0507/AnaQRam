@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -25,6 +24,8 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,6 +41,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        final String[] ans = {"あ","い", "う", "え", "お"};
+        final List<String> indexes = new ArrayList<>(ans.length);
+        for (int i = 0; i < ans.length; i++)
+            indexes.add(String.valueOf(i));
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -63,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
                 .setRequestedPreviewSize(640, 480)
                 .build();
 
-        int permissionCheck = ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA);
         final int REQUEST_CODE = 1;
 
         cameraView.getHolder().addCallback(new SurfaceHolder.Callback() {
@@ -104,9 +109,10 @@ public class MainActivity extends AppCompatActivity {
                 if (barcodes.size() != 0) {
                     barcodeInfo.post(new Runnable() {    // Use the post method of the TextView
                         public void run() {
-                            barcodeInfo.setText(    // Update the TextView
-                                    barcodes.valueAt(0).displayValue
-                            );
+                            String qrText = barcodes.valueAt(0).displayValue;
+                            String output = indexes.contains(qrText) ? ans[Integer.valueOf(qrText)] : qrText;
+                            // Update the TextView
+                            barcodeInfo.setText(output);
                         }
                     });
                 }
