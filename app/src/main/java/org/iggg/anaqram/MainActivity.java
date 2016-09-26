@@ -42,9 +42,9 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final String[] ans = {"あ","い", "う", "え", "お"};
-        final List<String> indexes = new ArrayList<>(ans.length);
-        for (int i = 0; i < ans.length; i++)
+        final CharSequence ans = new CharSequence("あいうえお");
+        final List<String> indexes = new ArrayList<>(ans.length());
+        for (int i = 0; i < ans.length(); i++)
             indexes.add(String.valueOf(i));
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
         cameraView = (SurfaceView) findViewById(R.id.camera_view);
         barcodeInfo = (TextView) findViewById(R.id.code_info);
+        barcodeInfo.setText(ans.toString());
 
         barcodeDetector =
                 new BarcodeDetector.Builder(this)
@@ -110,9 +111,10 @@ public class MainActivity extends AppCompatActivity {
                     barcodeInfo.post(new Runnable() {    // Use the post method of the TextView
                         public void run() {
                             String qrText = barcodes.valueAt(0).displayValue;
-                            String output = indexes.contains(qrText) ? ans[Integer.valueOf(qrText)] : qrText;
+                            if (indexes.contains(qrText))
+                                ans.setFlag(Integer.valueOf(qrText));
                             // Update the TextView
-                            barcodeInfo.setText(output);
+                            barcodeInfo.setText(ans.toString());
                         }
                     });
                 }
