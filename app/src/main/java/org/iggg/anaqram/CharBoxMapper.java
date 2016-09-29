@@ -1,7 +1,10 @@
 package org.iggg.anaqram;
 
+import android.content.Context;
 import android.graphics.Color;
+import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import java.util.HashMap;
 
@@ -11,14 +14,34 @@ class CharBoxMapper {
     private Button[] buttons;
     private HashMap<Button,CharBox> charBoxes;
 
-    CharBoxMapper(Button[] bs, CharBox[] cbs) {
-        buttons = bs;
-        charBoxes = new HashMap<>(bs.length);
-        for (int i = 0; i < bs.length; i++)
-            charBoxes.put(bs[i], cbs[i]);
+    CharBoxMapper(Context context, CharBox[] cbs) {
+        buttons = new Button[cbs.length];
+        for (int i = 0; i < cbs.length; i++) {
+            Button button = new Button(context);
+            buttons[i] = button;
+        }
+
+        charBoxes = new HashMap<>(buttons.length);
+        for (int i = 0; i < buttons.length; i++)
+            charBoxes.put(buttons[i], cbs[i]);
+
+        for (Button button : buttons) {
+            LinearLayout.LayoutParams buttonLayoutParams = new LinearLayout.LayoutParams(150,150);
+            button.setLayoutParams(buttonLayoutParams);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    swapCharBox((Button) v);
+                }
+            });
+        }
     }
 
-    void swapCharBox(Button button) {
+    Button[] getButtons() {
+        return buttons;
+    }
+
+    private void swapCharBox(Button button) {
         if (clickedButton == null) {
             button.setTextColor(Color.RED);
             clickedButton = button;

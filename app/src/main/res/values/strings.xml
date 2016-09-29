@@ -2,4 +2,7 @@
     <string name="app_name">AnaQRam</string>
     <string name="action_settings">Settings</string>
     <string name="default_msg">QRコードをスキャンしてください！</string>
+    <string name="reset_ans">Reset Answer</string>
+    <string name="reset_ans_hint">AnaQRamの答えを入力してください</string>
+    <string name="default_ans">あなくらむ！</string>
 </resources>

@@ -2,8 +2,11 @@ package org.iggg.anaqram;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -26,8 +29,6 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,6 +37,9 @@ public class MainActivity extends AppCompatActivity {
     private CameraSource cameraSource;
     private SurfaceView cameraView;
     private TextView barcodeInfo;
+    private CharSequence charSequence;
+    private CharBoxMapper charBoxMapper;
+    private String ans;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -43,35 +47,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        updateSetting();
 
-        final String ans = "あいうえお";
-        final CharSequence charSequence = new CharSequence(ans);
-        final List<String> indexes = new ArrayList<>(charSequence.length());
-        for (int i = 0; i < charSequence.length(); i++)
-            indexes.add(String.valueOf(i));
-
-        LinearLayout buttonArea = (LinearLayout) findViewById(R.id.buttonArea);
-        Button[] buttons = new Button[charSequence.length()];
-        for (int i = 0; i < charSequence.length(); i++) {
-            Button button = new Button(this);
-            buttons[i] = button;
-        }
-
-        final CharBoxMapper charBoxMapper = new CharBoxMapper(buttons, charSequence.getValues());
-        charBoxMapper.updateChar();
-
-        for (Button button : buttons) {
-        LinearLayout.LayoutParams buttonLayoutParams = new LinearLayout.LayoutParams(150,150);
-            button.setLayoutParams(buttonLayoutParams);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    charBoxMapper.swapCharBox((Button) v);
-                }
-            });
-            buttonArea.addView(button);
-        }
-
+        /* 下部のメニューボタンを描画 */
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        /* 中央部のカメラを描画 */
         cameraView = (SurfaceView) findViewById(R.id.camera_view);
         barcodeInfo = (TextView) findViewById(R.id.code_info);
 
@@ -94,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                 .setRequestedPreviewSize(640, 480)
                 .build();
 
-        final int REQUEST_CODE = 1;
+        final int REQUEST_CODE = 1; // カメラの権限を得るときに利用する
 
         cameraView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
@@ -109,6 +88,8 @@ public class MainActivity extends AppCompatActivity {
                     cameraSource.start(cameraView.getHolder());
                 } catch (IOException ie) {
                     Log.e("CAMERA SOURCE", ie.getMessage());
+                } catch (Exception e) {
+                    // ???
                 }
             }
 
@@ -132,16 +113,18 @@ public class MainActivity extends AppCompatActivity {
                 if (barcodes.size() != 0) {
                     barcodeInfo.post(new Runnable() {    // Use the post method of the TextView
                         public void run() {
-                            String qrText = barcodes.valueAt(0).displayValue;
-                            String msg = "ちがうQRコードです";
-                            if (indexes.contains(qrText)) {
-                                // 剰余を取って文字数未満の数字が出ても大丈夫にしている
-                                int index = Integer.valueOf(qrText) % charSequence.length();
-                                charSequence.setFlag(index);
-                                msg = "「" + charSequence.at(index) + "」をみつけました！";
-                            }
-                            barcodeInfo.setText(msg);
-                            charBoxMapper.updateChar();
+                        String qrText = barcodes.valueAt(0).displayValue;
+                        String msg = "ちがうQRコードです";
+                        try {
+                            // 剰余を取って文字数未満の数字が出ても大丈夫にしている
+                            int index = Integer.valueOf(qrText) % charSequence.length();
+                            charSequence.setFlag(index);
+                            msg = "「" + charSequence.at(index) + "」をみつけました！";
+                        } catch (NumberFormatException e) {
+                            // qrText が数字以外の場合は何もしない
+                        }
+                        barcodeInfo.setText(msg);
+                        charBoxMapper.updateChar();
                         }
                     });
                 }
@@ -166,6 +149,8 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         }
 
@@ -173,9 +158,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        ans = prefs.getString("answer","");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (!prefs.getString("answer","").equals(ans))
+            updateSetting();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         cameraSource.release();
         barcodeDetector.release();
+    }
+
+    void updateSetting() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        charSequence = new CharSequence(prefs.getString("answer",""));
+
+        /* 上部のボタン文字列を描画 */
+        LinearLayout buttonArea = (LinearLayout) findViewById(R.id.buttonArea);
+        charBoxMapper = new CharBoxMapper(this, charSequence.getValues());
+        charBoxMapper.updateChar();
+
+        buttonArea.removeAllViews();
+        for (Button button : charBoxMapper.getButtons())
+            buttonArea.addView(button);
     }
 }
