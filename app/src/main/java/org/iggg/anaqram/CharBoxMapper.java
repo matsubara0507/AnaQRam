@@ -6,7 +6,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 class CharBoxMapper {
     private Button clickedButton = null;
@@ -60,6 +63,24 @@ class CharBoxMapper {
     void updateChar() {
         for (Button button : buttons)
             button.setText(charBoxes.get(button).toString());
+    }
+
+    private CharBox[] getCurrentCharBoxes() {
+        CharBox[] current = new CharBox[buttons.length];
+        for (int i = 0; i < buttons.length; i++)
+            current[i] = charBoxes.get(buttons[i]);
+        return current;
+    }
+
+    void shuffle() {
+        List<Integer> indexes = new ArrayList<>(buttons.length);
+        for (int i = 0; i < buttons.length; i++)
+            indexes.add(i);
+        Collections.shuffle(indexes);
+
+        CharBox[] current = getCurrentCharBoxes();
+        for(int i = 0; i < buttons.length; i++)
+            charBoxes.put(buttons[i], current[indexes.get(i)]);
     }
 
     String getCurrentString() {

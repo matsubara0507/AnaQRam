@@ -186,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
         /* 上部のボタン文字列を描画 */
         LinearLayout buttonArea = (LinearLayout) findViewById(R.id.buttonArea);
         charBoxMapper = new CharBoxMapper(this, charSequence.getValues());
+        charBoxMapper.shuffle();
         charBoxMapper.updateChar();
 
         buttonArea.removeAllViews();
