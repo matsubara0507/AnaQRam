@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -14,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -22,6 +24,7 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
@@ -180,17 +183,42 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void updateSetting() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         charSequence = new CharSequence(prefs.getString("answer",""));
 
         /* 上部のボタン文字列を描画 */
         LinearLayout buttonArea = (LinearLayout) findViewById(R.id.buttonArea);
-        charBoxMapper = new CharBoxMapper(this, charSequence.getValues());
+
+        View.OnClickListener listener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                charBoxMapper.swapCharBox((Button) v);
+                if (charBoxMapper.getCurrentString().equals(prefs.getString("answer","")))
+                    toastMake("くりあ～！", 0, 0);
+
+            }
+        };
+
+        charBoxMapper = new CharBoxMapper(this, charSequence.getValues(), listener);
         charBoxMapper.shuffle();
         charBoxMapper.updateChar();
 
         buttonArea.removeAllViews();
         for (Button button : charBoxMapper.getButtons())
             buttonArea.addView(button);
+    }
+
+    private void toastMake(String message, int x, int y){
+        TextView text = new TextView(this);
+        text.setText(message);
+        text.setTextSize(50);
+        text.setTextColor(Color.WHITE);
+        text.setBackgroundColor(Color.DKGRAY);
+
+        Toast toast = new Toast(this);
+        toast.setGravity(Gravity.CENTER, x, y);
+        toast.setDuration(Toast.LENGTH_LONG);
+        toast.setView(text);
+        toast.show();
     }
 }

@@ -17,7 +17,7 @@ class CharBoxMapper {
     private Button[] buttons;
     private HashMap<Button,CharBox> charBoxes;
 
-    CharBoxMapper(Context context, CharBox[] cbs) {
+    CharBoxMapper(Context context, CharBox[] cbs, View.OnClickListener listener) {
         buttons = new Button[cbs.length];
         for (int i = 0; i < cbs.length; i++) {
             Button button = new Button(context);
@@ -32,12 +32,7 @@ class CharBoxMapper {
             LinearLayout.LayoutParams buttonLayoutParams = new LinearLayout.LayoutParams(150,150);
             button.setLayoutParams(buttonLayoutParams);
             button.setTextSize(30);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    swapCharBox((Button) v);
-                }
-            });
+            button.setOnClickListener(listener);
         }
     }
 
@@ -45,7 +40,7 @@ class CharBoxMapper {
         return buttons;
     }
 
-    private void swapCharBox(Button button) {
+    void swapCharBox(Button button) {
         if (clickedButton == null) {
             button.setTextColor(Color.RED);
             clickedButton = button;
