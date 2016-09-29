@@ -13,6 +13,11 @@
 - 文字列長以上の数字を読み取っても問題ない
   - 剰余を取ってるため
 - 問題の文字列は設定でいじれる
+- 画面を回転してもリセットされないようにした
+  - ただ `android:configChanges="orientation|screenSize"` を加えただけ
+  - TODO: もっと良い方法はあるのだろうか
+- スタート時に文字列がシャッフルされるようにした
+  - 答えを変えてもされるはず
 
 ## 参照
 
@@ -21,3 +26,9 @@
 - 設定画面の追加
   - http://blogand.stack3.net/archives/239
   - http://appdevmem.blogspot.jp/2015/09/android-app-settings.html
+- 画面回転時のリセット
+  - http://qiita.com/sy_sft_/items/502280b5e41b2ff0dfa9
+  - これはだめだった
+	- https://www.ipentec.com/document/document.aspx?page=android-rotate-screen-save-value-in-bundle
+- シャッフル
+  - http://javatechnology.net/java/list-shuffle/
