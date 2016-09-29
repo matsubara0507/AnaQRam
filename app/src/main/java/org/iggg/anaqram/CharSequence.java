@@ -24,24 +24,29 @@ class CharBox {
 }
 
 class CharSequence {
-    private List<CharBox> values;
+    private CharBox[] values;
 
     CharSequence(String str) {
-        values = new ArrayList<>(str.length());
+        values = new CharBox[str.length()];
+        int i = 0;
         for (char c: str.toCharArray())
-            values.add(new CharBox(c));
+            values[i++] = new CharBox(c);
     }
 
     int length() {
-        return values.size();
+        return values.length;
     }
 
     String at(int index) {
-        return values.get(index).toString();
+        return values[index].toString();
     }
 
     void setFlag(int index) {
-        values.get(index).setFlag();
+        values[index].setFlag();
+    }
+
+    CharBox[] getValues() {
+        return values;
     }
 
     @Override

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -21,7 +22,13 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_main" />
+    <LinearLayout
+        android:id="@+id/buttonArea"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="70dp"
+        android:layout_gravity="center|top"
+        android:layout_marginTop="80dp" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
@@ -29,14 +36,22 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
-
+        app:srcCompat="@android:drawable/ic_dialog_dialer" />
 
     <SurfaceView
         android:layout_width="300dp"
         android:layout_height="300dp"
-        android:layout_centerVertical="true"
         android:layout_gravity="center"
+        android:layout_marginTop="100dp"
         android:id="@+id/camera_view"
         />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/code_info"
+        android:text="@string/default_msg"
+        android:layout_gravity="center|bottom"
+        android:layout_marginBottom="20dp" />
+
 </android.support.design.widget.CoordinatorLayout>

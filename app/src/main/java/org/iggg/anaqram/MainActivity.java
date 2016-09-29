@@ -16,6 +16,8 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.vision.CameraSource;
@@ -42,10 +44,33 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final CharSequence ans = new CharSequence("あいうえお");
-        final List<String> indexes = new ArrayList<>(ans.length());
-        for (int i = 0; i < ans.length(); i++)
+        final String ans = "あいうえお";
+        final CharSequence charSequence = new CharSequence(ans);
+        final List<String> indexes = new ArrayList<>(charSequence.length());
+        for (int i = 0; i < charSequence.length(); i++)
             indexes.add(String.valueOf(i));
+
+        LinearLayout buttonArea = (LinearLayout) findViewById(R.id.buttonArea);
+        Button[] buttons = new Button[charSequence.length()];
+        for (int i = 0; i < charSequence.length(); i++) {
+            Button button = new Button(this);
+            buttons[i] = button;
+        }
+
+        final CharBoxMapper charBoxMapper = new CharBoxMapper(buttons, charSequence.getValues());
+        charBoxMapper.updateChar();
+
+        for (Button button : buttons) {
+        LinearLayout.LayoutParams buttonLayoutParams = new LinearLayout.LayoutParams(150,150);
+            button.setLayoutParams(buttonLayoutParams);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    charBoxMapper.swapCharBox((Button) v);
+                }
+            });
+            buttonArea.addView(button);
+        }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -58,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
 
         cameraView = (SurfaceView) findViewById(R.id.camera_view);
         barcodeInfo = (TextView) findViewById(R.id.code_info);
-        barcodeInfo.setText(ans.toString());
 
         barcodeDetector =
                 new BarcodeDetector.Builder(this)
@@ -89,8 +113,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            }
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) { }
 
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
@@ -100,8 +123,7 @@ public class MainActivity extends AppCompatActivity {
 
         barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
             @Override
-            public void release() {
-            }
+            public void release() { }
 
             @Override
             public void receiveDetections(Detector.Detections<Barcode> detections) {
@@ -111,10 +133,15 @@ public class MainActivity extends AppCompatActivity {
                     barcodeInfo.post(new Runnable() {    // Use the post method of the TextView
                         public void run() {
                             String qrText = barcodes.valueAt(0).displayValue;
-                            if (indexes.contains(qrText))
-                                ans.setFlag(Integer.valueOf(qrText));
-                            // Update the TextView
-                            barcodeInfo.setText(ans.toString());
+                            String msg = "ちがうQRコードです";
+                            if (indexes.contains(qrText)) {
+                                // 剰余を取って文字数未満の数字が出ても大丈夫にしている
+                                int index = Integer.valueOf(qrText) % charSequence.length();
+                                charSequence.setFlag(index);
+                                msg = "「" + charSequence.at(index) + "」をみつけました！";
+                            }
+                            barcodeInfo.setText(msg);
+                            charBoxMapper.updateChar();
                         }
                     });
                 }
