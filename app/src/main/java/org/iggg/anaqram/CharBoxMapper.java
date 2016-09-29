@@ -28,6 +28,7 @@ class CharBoxMapper {
         for (Button button : buttons) {
             LinearLayout.LayoutParams buttonLayoutParams = new LinearLayout.LayoutParams(150,150);
             button.setLayoutParams(buttonLayoutParams);
+            button.setTextSize(30);
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

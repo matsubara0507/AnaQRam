@@ -51,6 +51,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/code_info"
         android:text="@string/default_msg"
+        android:textSize="30sp"
         android:layout_gravity="center|bottom"
         android:layout_marginBottom="20dp" />
 

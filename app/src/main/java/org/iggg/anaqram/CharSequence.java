@@ -1,8 +1,5 @@
 package org.iggg.anaqram;
 
-import java.util.ArrayList;
-import java.util.List;
-
 class CharBox {
     private char value;
     private boolean flag;
