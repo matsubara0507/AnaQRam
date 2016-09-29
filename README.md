@@ -33,3 +33,5 @@
 	- https://www.ipentec.com/document/document.aspx?page=android-rotate-screen-save-value-in-bundle
 - シャッフル
   - http://javatechnology.net/java/list-shuffle/
+- トースト
+ - http://blog.fujiu.jp/2013/11/14-android-toast.html
