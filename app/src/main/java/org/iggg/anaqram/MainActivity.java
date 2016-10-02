@@ -1,22 +1,17 @@
 package org.iggg.anaqram;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
-import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.Menu;
@@ -26,23 +21,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
-import com.google.android.gms.vision.barcode.BarcodeDetector;
-
-import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Activity activity = this;
-    private BarcodeDetector barcodeDetector;
-    private CameraSource cameraSource;
-    private SurfaceView cameraView;
     private TextView barcodeInfo;
-    private CharSequence charSequence;
     private CharBoxMapper charBoxMapper;
-    private String ans;
+    private GameManager gameManager;
+    private BarcodeDetectorManager barcodeDetectorManager;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -63,71 +50,24 @@ public class MainActivity extends AppCompatActivity {
         });
 
         /* 中央部のカメラを描画 */
-        cameraView = (SurfaceView) findViewById(R.id.camera_view);
+        SurfaceView cameraView = (SurfaceView) findViewById(R.id.camera_view);
+        barcodeDetectorManager = new BarcodeDetectorManager(cameraView, this);
+
         barcodeInfo = (TextView) findViewById(R.id.code_info);
 
-        barcodeDetector =
-                new BarcodeDetector.Builder(this)
-                        .setBarcodeFormats(Barcode.QR_CODE)
-                        .build();
-
-        cameraSource = new CameraSource
-                .Builder(this, barcodeDetector)
-                .setRequestedPreviewSize(640, 480)
-                .build();
-
-        final int REQUEST_CODE = 1; // カメラの権限を得るときに利用する
-
-        cameraView.getHolder().addCallback(new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceCreated(SurfaceHolder holder) {
-                try {
-                    if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(activity, new String[]{
-                                Manifest.permission.CAMERA
-                        }, REQUEST_CODE);
-                        return;
-                    }
-                    cameraSource.start(cameraView.getHolder());
-                } catch (IOException ie) {
-                    Log.e("CAMERA SOURCE", ie.getMessage());
-                } catch (Exception e) {
-                    // ???
-                }
-            }
-
-            @Override
-            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) { }
-
-            @Override
-            public void surfaceDestroyed(SurfaceHolder holder) {
-                cameraSource.stop();
-            }
-        });
-
-        barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
+        barcodeDetectorManager.setProcessor(new Detector.Processor<Barcode>() {
             @Override
             public void release() { }
 
             @Override
             public void receiveDetections(Detector.Detections<Barcode> detections) {
-                final SparseArray<Barcode> barcodes = detections.getDetectedItems();
-
-                if (barcodes.size() != 0) {
+                final SparseArray<Barcode> barcode = detections.getDetectedItems();
+                if (barcode.size() != 0) {
                     barcodeInfo.post(new Runnable() {    // Use the post method of the TextView
                         public void run() {
-                        String qrText = barcodes.valueAt(0).displayValue;
-                        String msg = "ちがうQRコードです";
-                        try {
-                            // 剰余を取って文字数未満の数字が出ても大丈夫にしている
-                            int index = Integer.valueOf(qrText) % charSequence.length();
-                            charSequence.setFlag(index);
-                            msg = "「" + charSequence.at(index) + "」をみつけました！";
-                        } catch (NumberFormatException e) {
-                            // qrText が数字以外の場合は何もしない
-                        }
-                        barcodeInfo.setText(msg);
-                        charBoxMapper.updateChar();
+                            String qrText = barcode.valueAt(0).displayValue;
+                            barcodeInfo.setText(gameManager.displayChar(qrText));
+                            charBoxMapper.updateChar();
                         }
                     });
                 }
@@ -161,30 +101,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        ans = prefs.getString("answer","");
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (!prefs.getString("answer","").equals(ans))
+        if (!prefs.getString("answer","").equals(gameManager.getAnswer()))
             updateSetting();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        cameraSource.release();
-        barcodeDetector.release();
+        barcodeDetectorManager.release();
     }
 
     void updateSetting() {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        charSequence = new CharSequence(prefs.getString("answer",""));
+        gameManager = new GameManager(prefs.getString("answer",""));
 
         /* 上部のボタン文字列を描画 */
         LinearLayout buttonArea = (LinearLayout) findViewById(R.id.buttonArea);
@@ -192,14 +124,15 @@ public class MainActivity extends AppCompatActivity {
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                charBoxMapper.swapCharBox((Button) v);
-                if (charBoxMapper.getCurrentString().equals(prefs.getString("answer","")))
-                    toastMake("くりあ～！", 0, 0);
+            charBoxMapper.swapCharBox((Button) v);
+            String msg = gameManager.accept(charBoxMapper.getCurrentString());
+            if (msg != null)
+                toastMake(msg, 0, 0);
 
             }
         };
 
-        charBoxMapper = new CharBoxMapper(this, charSequence.getValues(), listener);
+        charBoxMapper = new CharBoxMapper(this, gameManager.getCharBoxes(), listener);
         charBoxMapper.shuffle();
         charBoxMapper.updateChar();
 
@@ -208,17 +141,18 @@ public class MainActivity extends AppCompatActivity {
             buttonArea.addView(button);
     }
 
-    private void toastMake(String message, int x, int y){
+    private void toastMake(String message, int x, int y) {
         TextView text = new TextView(this);
         text.setText(message);
         text.setTextSize(50);
         text.setTextColor(Color.WHITE);
-        text.setBackgroundColor(Color.DKGRAY);
+        text.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
 
         Toast toast = new Toast(this);
         toast.setGravity(Gravity.CENTER, x, y);
         toast.setDuration(Toast.LENGTH_LONG);
         toast.setView(text);
+
         toast.show();
     }
 }
