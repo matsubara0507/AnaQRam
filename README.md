@@ -19,6 +19,11 @@
 - スタート時に文字列がシャッフルされるようにした
   - 答えを変えてもされるはず
 - 文字列が合っていたら「くりあ～！」と出る
+- タイマー機能を追加
+  - スタートボタンを押さないとスキャンできない
+  - スタートボタンを押すとタイマースタート
+  - スタートするとリセットボタンに変わる
+  - リセットボタンを押すと全てリセットされる
 
 ## 参照
 
@@ -34,4 +39,6 @@
 - シャッフル
   - http://javatechnology.net/java/list-shuffle/
 - トースト
- - http://blog.fujiu.jp/2013/11/14-android-toast.html
+  - http://blog.fujiu.jp/2013/11/14-android-toast.html
+- タイマー
+  - https://akira-watson.com/android/timertask.html
