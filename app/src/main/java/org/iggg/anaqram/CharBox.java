@@ -14,6 +14,10 @@ class CharBox {
         flag = true;
     }
 
+    void resetFlag() {
+        flag = false;
+    }
+
     @Override
     public String toString() {
         return String.valueOf(flag ? value : defaultValue);

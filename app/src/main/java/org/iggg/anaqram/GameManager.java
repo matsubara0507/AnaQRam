@@ -1,14 +1,26 @@
 package org.iggg.anaqram;
 
+import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.widget.TextView;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 class GameManager {
     private String answer;
     private boolean clear = false;
     private CharBox[] charBoxes;
 
-    GameManager(String ans) {
+    private boolean running = false;
+    private Timer timer;
+    private Handler handler = new Handler();
+    private long count = 0;
+    private TextView timerText;
+
+    GameManager(String ans, TextView tt) {
         answer = ans;
+        timerText = tt;
         charBoxes = new CharBox[ans.length()];
         int i = 0;
         for (char c: ans.toCharArray())
@@ -44,8 +56,49 @@ class GameManager {
     String accept(String solution) {
         if (solution.equals(answer) && !clear) {
             clear = true;
+            if (timer != null)
+                timer.cancel();
             return "くりあ～～ ヽ(^◇^*)/";
         }
         return null;
+    }
+
+    boolean isRunning() {
+        return running;
+    }
+
+    void start() {
+        if (null != timer) {
+            timer.cancel();
+            timer = null;
+        }
+        timer = new Timer();
+        count = 0;
+        timerText.setText("00:00");
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        count++;
+                        long mm = count * 100 / 1000 / 60;
+                        long ss = count * 100 / 1000 % 60;
+                        timerText.setText(String.format("%1$02d:%2$02d", mm, ss));
+                    }
+                });
+            }
+        }, 0, 100);
+        running = true;
+    }
+
+    void reset() {
+        timer.cancel();
+        timer = null;
+        timerText.setText("00:00");
+
+        for (CharBox cb : charBoxes)
+            cb.resetFlag();
+
+        running = false;
     }
 }

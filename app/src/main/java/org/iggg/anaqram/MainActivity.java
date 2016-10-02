@@ -5,8 +5,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -31,23 +29,37 @@ public class MainActivity extends AppCompatActivity {
     private GameManager gameManager;
     private BarcodeDetectorManager barcodeDetectorManager;
 
+    private Button startButton;
+    private TextView timerText;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        updateSetting();
+        startButton = (Button)findViewById(R.id.start_button);
+        timerText = (TextView)findViewById(R.id.timer);
 
-        /* 下部のメニューボタンを描画 */
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        startButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onClick(View v) {
+                if (gameManager.isRunning()) {
+                    gameManager.reset();
+                    charBoxMapper.shuffle();
+                    charBoxMapper.updateChar();
+                    barcodeInfo.setText(getString(R.string.please_start));
+                    startButton.setText(getString(R.string.start));
+                }
+                else {
+                    gameManager.start();
+                    barcodeInfo.setText(getString(R.string.please_scan));
+                    startButton.setText(getString(R.string.reset));
+                }
             }
         });
+
+        updateSetting();
 
         /* 中央部のカメラを描画 */
         SurfaceView cameraView = (SurfaceView) findViewById(R.id.camera_view);
@@ -62,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void receiveDetections(Detector.Detections<Barcode> detections) {
                 final SparseArray<Barcode> barcode = detections.getDetectedItems();
-                if (barcode.size() != 0) {
+                if (barcode.size() != 0 && gameManager.isRunning()) {
                     barcodeInfo.post(new Runnable() {    // Use the post method of the TextView
                         public void run() {
                             String qrText = barcode.valueAt(0).displayValue;
@@ -73,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
     }
 
     @Override
@@ -104,8 +115,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (!prefs.getString("answer","").equals(gameManager.getAnswer()))
+        if (!prefs.getString("answer","").equals(gameManager.getAnswer())) {
+            gameManager.reset();
             updateSetting();
+        }
     }
 
     @Override
@@ -116,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
 
     void updateSetting() {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        gameManager = new GameManager(prefs.getString("answer",""));
+        gameManager = new GameManager(prefs.getString("answer",""), timerText);
 
         /* 上部のボタン文字列を描画 */
         LinearLayout buttonArea = (LinearLayout) findViewById(R.id.buttonArea);
@@ -128,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
             String msg = gameManager.accept(charBoxMapper.getCurrentString());
             if (msg != null)
                 toastMake(msg, 0, 0);
-
             }
         };
 

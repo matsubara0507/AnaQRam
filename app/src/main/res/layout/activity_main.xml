@@ -30,14 +30,6 @@
         android:layout_gravity="center|top"
         android:layout_marginTop="80dp" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_dialog_dialer" />
-
     <SurfaceView
         android:layout_width="300dp"
         android:layout_height="300dp"
@@ -50,9 +42,33 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/code_info"
-        android:text="@string/default_msg"
+        android:text="@string/please_start"
         android:textSize="30sp"
         android:layout_gravity="center|bottom"
         android:layout_marginBottom="20dp" />
+
+    <TextView
+        android:id="@+id/timer"
+        android:text="@string/timer"
+        android:textSize="60sp"
+        android:layout_marginBottom="150sp"
+        android:layout_marginEnd="20sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|end|bottom" />
+
+    <Button
+        android:text="@string/start"
+        android:textSize="30sp"
+        android:textColor="@color/common_google_signin_btn_text_light"
+        android:padding="10sp"
+        android:layout_marginBottom="90sp"
+        android:layout_marginEnd="20sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/start_button"
+        android:layout_gravity="center|end|bottom" />
+
+
 
 </android.support.design.widget.CoordinatorLayout>
