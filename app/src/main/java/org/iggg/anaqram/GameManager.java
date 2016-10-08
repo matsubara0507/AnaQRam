@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.widget.TextView;
 
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -18,9 +19,12 @@ class GameManager {
     private long count = 0;
     private TextView timerText;
 
+    private final String initTime = "00:00";
+
     GameManager(String ans, TextView tt) {
         answer = ans;
         timerText = tt;
+        timerText.setText(initTime);
         charBoxes = new CharBox[ans.length()];
         int i = 0;
         for (char c: ans.toCharArray())
@@ -74,7 +78,7 @@ class GameManager {
         }
         timer = new Timer();
         count = 0;
-        timerText.setText("00:00");
+        timerText.setText(initTime);
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -83,7 +87,7 @@ class GameManager {
                         count++;
                         long mm = count * 100 / 1000 / 60;
                         long ss = count * 100 / 1000 % 60;
-                        timerText.setText(String.format("%1$02d:%2$02d", mm, ss));
+                        timerText.setText(String.format(Locale.US, "%1$02d:%2$02d", mm, ss));
                     }
                 });
             }
@@ -95,7 +99,7 @@ class GameManager {
         if (timer != null)
             timer.cancel();
         timer = null;
-        timerText.setText("00:00");
+        timerText.setText(initTime);
 
         for (CharBox cb : charBoxes)
             cb.resetFlag();
