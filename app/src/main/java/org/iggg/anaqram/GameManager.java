@@ -92,7 +92,8 @@ class GameManager {
     }
 
     void reset() {
-        timer.cancel();
+        if (timer != null)
+            timer.cancel();
         timer = null;
         timerText.setText("00:00");
 
