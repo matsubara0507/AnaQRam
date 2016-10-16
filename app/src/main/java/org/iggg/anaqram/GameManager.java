@@ -105,5 +105,6 @@ class GameManager {
             cb.resetFlag();
 
         running = false;
+        clear = false;
     }
 }
