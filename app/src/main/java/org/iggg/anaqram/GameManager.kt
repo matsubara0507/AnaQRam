@@ -23,18 +23,13 @@ internal class GameManager(val answer: String, private val timerText: TextView) 
         timerText.text = initTime
     }
 
-    fun displayChar(qrText: String): String {
-        try {
+    fun displayChar(qrText: String): String =
+        qrText.toIntOrNull()?.let {
             // 剰余を取って文字数未満の数字が出ても大丈夫にしている
             val index = Integer.valueOf(qrText)!! % charBoxes.size
             charBoxes[index].open()
-            return "「" + charBoxes[index] + "」をみつけた！v(≧∇≦)v"
-        } catch (e: NumberFormatException) {
-            // qrText が数字以外の場合
-            return "ちがうQRコードだよ！(*￣∀￣)\"b\" ﾁｯﾁｯﾁｯ"
-        }
-
-    }
+            "「" + charBoxes[index] + "」をみつけた！v(≧∇≦)v"
+        } ?: "ちがうQRコードだよ！(*￣∀￣)\"b\" ﾁｯﾁｯﾁｯ"
 
     fun accept(solution: String): String? {
         if (solution == answer && !clear) {
@@ -68,7 +63,7 @@ internal class GameManager(val answer: String, private val timerText: TextView) 
         timer = null
         timerText.text = initTime
 
-        charBoxes.map { charBox -> charBox.reset() }
+        charBoxes.forEach { charBox -> charBox.reset() }
 
         isRunning = false
         clear = false

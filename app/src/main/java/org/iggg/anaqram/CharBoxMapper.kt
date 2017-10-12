@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 
-import java.util.ArrayList
 import java.util.Collections
 import java.util.HashMap
 
@@ -17,7 +16,7 @@ internal class CharBoxMapper(context: Context, charBoxes: List<CharBox>, clear: 
     val buttons: List<Button> = charBoxes.map { Button(context) }
     private val charBoxMap: HashMap<Button, CharBox> = HashMap(charBoxes.size)
 
-    val currentString: String
+    private val currentString: String
         get() = buttons.fold("", { acc, button -> acc + button.text })
 
     init {
@@ -36,12 +35,11 @@ internal class CharBoxMapper(context: Context, charBoxes: List<CharBox>, clear: 
         }
     }
 
-    fun swapCharBox(button: Button) {
-        charBoxMap[clickedButton]?.let {
-            val temp = it
-            charBoxMap[button]?.let {
-                charBoxMap.put(button, temp)
-                charBoxMap.put(clickedButton, it)
+    private fun swapCharBox(button: Button) {
+        charBoxMap[clickedButton]?.let { clickedCharBox ->
+            charBoxMap[button]?.let { charBox ->
+                charBoxMap.put(button, clickedCharBox)
+                charBoxMap.put(clickedButton, charBox)
                 clickedButton.setTextColor(Color.BLACK)
                 clickedButton = unUseButton
                 updateChar()

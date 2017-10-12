@@ -17,25 +17,26 @@ import com.google.android.gms.vision.barcode.BarcodeDetector
 import java.io.IOException
 
 internal class BarcodeDetectorManager(private val cameraView: SurfaceView, private val activity: Activity) {
-    private val barcodeDetector: BarcodeDetector
+    private val barcodeDetector: BarcodeDetector =
+            BarcodeDetector.Builder(activity)
+                    .setBarcodeFormats(Barcode.QR_CODE)
+                    .build()
+
     private val cameraSource: CameraSource
 
     init {
-        barcodeDetector = BarcodeDetector.Builder(activity)
-                .setBarcodeFormats(Barcode.QR_CODE)
-                .build()
 
         cameraSource = CameraSource.Builder(activity, barcodeDetector)
                 .setRequestedPreviewSize(640, 480)
                 .build()
 
-        val REQUEST_CODE = 1 // カメラの権限を得るときに利用する
+        val requestCode = 1 // カメラの権限を得るときに利用する
 
         cameraView.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
                 try {
                     if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.CAMERA), REQUEST_CODE)
+                        ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.CAMERA), requestCode)
                         return
                     }
                     cameraSource.start(cameraView.holder)

@@ -1,17 +1,14 @@
 package org.iggg.anaqram
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
-import android.util.SparseArray
 import android.view.Gravity
 import android.view.SurfaceView
-import android.view.View
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
@@ -100,8 +97,8 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         model!!.let {
-            if (prefs.getString("answer", "") != it.gameManager!!.answer) {
-                it.gameManager!!.reset()
+            if (prefs.getString("answer", "") != it.gameManager.answer) {
+                it.gameManager.reset()
                 updateSetting()
             }
         }
