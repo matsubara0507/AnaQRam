@@ -48,10 +48,8 @@ internal class CharBoxMapper(context: Context, charBoxes: List<CharBox>, listene
         clickedButton = button
     }
 
-    fun updateChar() {
-        for (button in buttons)
-            button.text = charBoxMap[button].toString()
-    }
+    fun updateChar() =
+        buttons.forEach { button -> button.text = charBoxMap[button].toString() }
 
     fun shuffle() {
         val currentCharBoxes = charBoxMap.values.toTypedArray()
