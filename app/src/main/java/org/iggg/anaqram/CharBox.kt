@@ -1,23 +1,18 @@
 package org.iggg.anaqram
 
-internal class CharBox(private val value: Char) {
-    private var flag: Boolean = false
+internal class CharBox(private val value: Char = defaultValue) {
+    private var opened: Boolean = false
 
-    init {
-        flag = false
+    fun open() {
+        opened = true
     }
 
-    fun setFlag() {
-        flag = true
+    fun reset() {
+        opened = false
     }
 
-    fun resetFlag() {
-        flag = false
-    }
-
-    override fun toString(): String {
-        return (if (flag) value else defaultValue).toString()
-    }
+    override fun toString(): String =
+            (if (opened) value else defaultValue).toString()
 
     companion object {
         private val defaultValue = '？'

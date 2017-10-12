@@ -9,7 +9,7 @@ import java.util.TimerTask
 
 internal class GameManager(val answer: String, private val timerText: TextView) {
     private var clear = false
-    private val charBoxes: Array<CharBox?>
+    private val charBoxes: List<CharBox> = answer.toCharArray().map { c -> CharBox(c) }
 
     var isRunning = false
         private set
@@ -21,26 +21,17 @@ internal class GameManager(val answer: String, private val timerText: TextView) 
 
     init {
         timerText.text = initTime
-        charBoxes = arrayOfNulls(answer.length)
-        var i = 0
-        for (c in answer.toCharArray())
-            charBoxes[i++] = CharBox(c)
     }
 
     // コッチの charBoxes の中身を書き換えられたくないので
     // コピーしたものを渡している
-    fun getCharBoxes(): Array<CharBox?> {
-        val temp = arrayOfNulls<CharBox>(charBoxes.size)
-        for (i in charBoxes.indices)
-            temp[i] = charBoxes[i]
-        return temp
-    }
+    fun getCharBoxes(): List<CharBox> = charBoxes.map { c -> c }
 
     fun displayChar(qrText: String): String {
         try {
             // 剰余を取って文字数未満の数字が出ても大丈夫にしている
             val index = Integer.valueOf(qrText)!! % charBoxes.size
-            charBoxes[index]?.setFlag()
+            charBoxes[index].open()
             return "「" + charBoxes[index] + "」をみつけた！v(≧∇≦)v"
         } catch (e: NumberFormatException) {
             // qrText が数字以外の場合
@@ -86,8 +77,7 @@ internal class GameManager(val answer: String, private val timerText: TextView) 
         timer = null
         timerText.text = initTime
 
-        for (cb in charBoxes)
-            cb?.resetFlag()
+        charBoxes.map { charBox -> charBox.reset() }
 
         isRunning = false
         clear = false
