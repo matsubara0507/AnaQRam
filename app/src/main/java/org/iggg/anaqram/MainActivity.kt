@@ -23,56 +23,52 @@ import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.barcode.Barcode
 
 class MainActivity : AppCompatActivity() {
+    data internal class Model(val gameManager: GameManager, val charBoxMapper: CharBoxMapper)
 
-    private var barcodeInfo: TextView? = null
-    private var charBoxMapper: CharBoxMapper? = null
-    private var gameManager: GameManager? = null
+    private var model: Model? = null
     private var barcodeDetectorManager: BarcodeDetectorManager? = null
-
-    private var startButton: Button? = null
-    private var timerText: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val toolbar = findViewById(R.id.toolbar) as Toolbar
-        setSupportActionBar(toolbar)
-        startButton = findViewById(R.id.start_button) as Button
-        timerText = findViewById(R.id.timer) as TextView
+        setSupportActionBar(findViewById(R.id.toolbar) as Toolbar)
 
-        startButton!!.setOnClickListener {
-            if (gameManager!!.isRunning) {
-                gameManager!!.reset()
-                charBoxMapper!!.shuffle()
-                charBoxMapper!!.updateChar()
-                barcodeInfo!!.text = getString(R.string.please_start)
-                startButton!!.text = getString(R.string.start)
-            } else {
-                gameManager!!.start()
-                barcodeInfo!!.text = getString(R.string.please_scan)
-                startButton!!.text = getString(R.string.reset)
+        val startButton = findViewById(R.id.start_button) as Button
+        val barcodeInfo = findViewById(R.id.code_info) as TextView
+
+        startButton.setOnClickListener {
+            model!!.let {
+                if (it.gameManager.isRunning) {
+                    it.gameManager.reset()
+                    it.charBoxMapper.shuffle()
+                    it.charBoxMapper.updateChar()
+                    barcodeInfo.text = getString(R.string.please_start)
+                    startButton.text = getString(R.string.start)
+                } else {
+                    it.gameManager.start()
+                    barcodeInfo.text = getString(R.string.please_scan)
+                    startButton.text = getString(R.string.reset)
+                }
             }
         }
 
-        updateSetting()
+        model = updateSetting()
 
         /* 中央部のカメラを描画 */
         val cameraView = findViewById(R.id.camera_view) as SurfaceView
         barcodeDetectorManager = BarcodeDetectorManager(cameraView, this)
-
-        barcodeInfo = findViewById(R.id.code_info) as TextView
-
         barcodeDetectorManager!!.setProcessor(object : Detector.Processor<Barcode> {
             override fun release() {}
 
             override fun receiveDetections(detections: Detector.Detections<Barcode>) {
                 val barcode = detections.detectedItems
-                if (barcode.size() != 0 && gameManager!!.isRunning) {
-                    barcodeInfo!!.post {
-                        val qrText = barcode.valueAt(0).displayValue
-                        barcodeInfo!!.text = gameManager!!.displayChar(qrText)
-                        charBoxMapper!!.updateChar()
-
+                model!!.let {
+                    if (barcode.size() != 0 && it.gameManager.isRunning) {
+                        barcodeInfo.post {
+                            val qrText = barcode.valueAt(0).displayValue
+                            barcodeInfo.text = it.gameManager.displayChar(qrText)
+                            it.charBoxMapper.updateChar()
+                        }
                     }
                 }
             }
@@ -91,7 +87,6 @@ class MainActivity : AppCompatActivity() {
         // as you specify a parent activity in AndroidManifest.xml.
         val id = item.itemId
 
-
         if (id == R.id.action_settings) {
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
@@ -104,38 +99,38 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        if (prefs.getString("answer", "") != gameManager!!.answer) {
-            gameManager!!.reset()
-            updateSetting()
+        model!!.let {
+            if (prefs.getString("answer", "") != it.gameManager!!.answer) {
+                it.gameManager!!.reset()
+                updateSetting()
+            }
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        barcodeDetectorManager!!.release()
+        barcodeDetectorManager?.release()
     }
 
-    internal fun updateSetting() {
+    private fun updateSetting(): Model  {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        gameManager = GameManager(prefs.getString("answer", ""), timerText!!)
+        val timerText = findViewById(R.id.timer) as TextView
+
+        val gameManager = GameManager(prefs.getString("answer", ""), timerText)
 
         /* 上部のボタン文字列を描画 */
         val buttonArea = findViewById(R.id.buttonArea) as LinearLayout
 
-        val listener = View.OnClickListener { v ->
-            charBoxMapper!!.swapCharBox(v as Button)
-            val msg = gameManager!!.accept(charBoxMapper!!.currentString)
-            if (msg != null)
-                toastMake(msg, 0, 0)
-        }
-
-        charBoxMapper = CharBoxMapper(this, gameManager!!.getCharBoxes(), listener)
-        charBoxMapper!!.shuffle()
-        charBoxMapper!!.updateChar()
+        val charBoxMapper = CharBoxMapper(this, gameManager.charBoxes, { str ->
+            gameManager.accept(str)?.let { toastMake(it, 0, 0) }
+        })
+        charBoxMapper.shuffle()
+        charBoxMapper.updateChar()
 
         buttonArea.removeAllViews()
-        for (button in charBoxMapper!!.buttons)
-            buttonArea.addView(button)
+        charBoxMapper.buttons.forEach { button -> buttonArea.addView(button) }
+
+        return Model(gameManager, charBoxMapper)
     }
 
     private fun toastMake(message: String?, x: Int, y: Int) {

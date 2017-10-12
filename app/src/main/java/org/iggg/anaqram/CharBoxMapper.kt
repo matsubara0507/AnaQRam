@@ -10,7 +10,7 @@ import java.util.ArrayList
 import java.util.Collections
 import java.util.HashMap
 
-internal class CharBoxMapper(context: Context, charBoxes: List<CharBox>, listener: View.OnClickListener) {
+internal class CharBoxMapper(context: Context, charBoxes: List<CharBox>, clear: (String) -> Unit) {
     private val unUseButton: Button = Button(context)
     private var clickedButton: Button = unUseButton
 
@@ -28,6 +28,10 @@ internal class CharBoxMapper(context: Context, charBoxes: List<CharBox>, listene
             val buttonLayoutParams = LinearLayout.LayoutParams(150, 150)
             button.layoutParams = buttonLayoutParams
             button.textSize = 30f
+            val listener = View.OnClickListener { v ->
+                this.swapCharBox(v as Button)
+                clear(this.currentString)
+            }
             button.setOnClickListener(listener)
         }
     }
