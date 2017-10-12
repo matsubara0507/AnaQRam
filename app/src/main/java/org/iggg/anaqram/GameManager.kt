@@ -9,7 +9,7 @@ import java.util.TimerTask
 
 internal class GameManager(val answer: String, private val timerText: TextView) {
     private var clear = false
-    private val charBoxes: List<CharBox> = answer.toCharArray().map { c -> CharBox(c) }
+    val charBoxes: List<CharBox> = answer.toCharArray().map { c -> CharBox(c) }
 
     var isRunning = false
         private set
@@ -22,10 +22,6 @@ internal class GameManager(val answer: String, private val timerText: TextView) 
     init {
         timerText.text = initTime
     }
-
-    // コッチの charBoxes の中身を書き換えられたくないので
-    // コピーしたものを渡している
-    fun getCharBoxes(): List<CharBox> = charBoxes.map { c -> c }
 
     fun displayChar(qrText: String): String {
         try {
