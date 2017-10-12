@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        model = updateSetting()
+        updateSetting()
 
         /* 中央部のカメラを描画 */
         val cameraView = findViewById(R.id.camera_view) as SurfaceView
@@ -112,7 +112,7 @@ class MainActivity : AppCompatActivity() {
         barcodeDetectorManager?.release()
     }
 
-    private fun updateSetting(): Model  {
+    private fun updateSetting() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val timerText = findViewById(R.id.timer) as TextView
 
@@ -130,7 +130,7 @@ class MainActivity : AppCompatActivity() {
         buttonArea.removeAllViews()
         charBoxMapper.buttons.forEach { button -> buttonArea.addView(button) }
 
-        return Model(gameManager, charBoxMapper)
+        model = Model(gameManager, charBoxMapper)
     }
 
     private fun toastMake(message: String?, x: Int, y: Int) {
