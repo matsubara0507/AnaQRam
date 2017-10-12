@@ -39,22 +39,18 @@ internal class GameManager(val answer: String, private val timerText: TextView) 
     fun accept(solution: String): String? {
         if (solution == answer && !clear) {
             clear = true
-            if (timer != null)
-                timer!!.cancel()
+            timer?.cancel()
             return "くりあ～～ ヽ(^◇^*)/"
         }
         return null
     }
 
     fun start() {
-        if (null != timer) {
-            timer!!.cancel()
-            timer = null
-        }
+        timer?.cancel()
         timer = Timer()
         count = 0
         timerText.text = initTime
-        timer!!.schedule(object : TimerTask() {
+        timer?.schedule(object : TimerTask() {
             override fun run() {
                 handler.post {
                     count++
@@ -68,8 +64,7 @@ internal class GameManager(val answer: String, private val timerText: TextView) 
     }
 
     fun reset() {
-        if (timer != null)
-            timer!!.cancel()
+        timer?.cancel()
         timer = null
         timerText.text = initTime
 
