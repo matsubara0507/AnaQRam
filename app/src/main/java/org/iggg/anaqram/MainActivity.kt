@@ -64,6 +64,7 @@ class MainActivity : AppCompatActivity() {
                                     val qrText = barcode.valueAt(0).displayValue
                                     barcodeInfo.text = gameManager.displayChar(qrText)
                                     charBoxMapper.updateChar()
+                                    gameManager.accept(charBoxMapper.currentString)?.let { toastMake(it, 0, 0) }
                                 }
                             }
                         }

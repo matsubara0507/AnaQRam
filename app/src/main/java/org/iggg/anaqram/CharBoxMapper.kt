@@ -15,7 +15,7 @@ internal class CharBoxMapper(context: Context, charBoxes: List<CharBox>, clear: 
     val buttons: List<Button> = charBoxes.map { Button(context) }
     private val charBoxMap: HashMap<Button, CharBox> = HashMap(charBoxes.size)
 
-    private val currentString: String
+    val currentString: String
         get() = buttons.fold("", { acc, button -> acc + button.text })
 
     init {
