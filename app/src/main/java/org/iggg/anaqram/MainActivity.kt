@@ -99,6 +99,10 @@ class MainActivity : AppCompatActivity() {
             if (prefs.getString("answer", "") != it.gameManager.answer) {
                 it.gameManager.reset()
                 updateSetting()
+                (findViewById(R.id.start_button) as Button).apply {
+                    callOnClick()
+                    callOnClick()
+                }
             }
         }
     }
