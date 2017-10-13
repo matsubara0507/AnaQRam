@@ -5,19 +5,20 @@ import android.widget.TextView
 
 import java.util.Locale
 import java.util.Timer
-import java.util.TimerTask
+import kotlin.concurrent.schedule
 
 internal class GameManager(val answer: String, private val timerText: TextView) {
-    private var clear = false
     val charBoxes: List<CharBox> = answer.toCharArray().map { c -> CharBox(c) }
-
     var isRunning = false
         private set
     private var timer: Timer? = null
-    private val handler = Handler()
     private var count: Long = 0
+    private var clear = false
 
-    private val initTime = "00:00"
+    companion object {
+        val handler = Handler()
+        val initTime = "00:00"
+    }
 
     init {
         timerText.text = initTime
@@ -31,40 +32,33 @@ internal class GameManager(val answer: String, private val timerText: TextView) 
             "「" + charBoxes[index] + "」をみつけた！v(≧∇≦)v"
         } ?: "ちがうQRコードだよ！(*￣∀￣)\"b\" ﾁｯﾁｯﾁｯ"
 
-    fun accept(solution: String): String? {
+    fun accept(solution: String): String? =
         if (solution == answer && !clear) {
             clear = true
             timer?.cancel()
-            return "くりあ～～ ヽ(^◇^*)/"
-        }
-        return null
-    }
+            "くりあ～～ ヽ(^◇^*)/"
+        } else null
 
     fun start() {
         timer?.cancel()
-        timer = Timer()
-        count = 0
-        timerText.text = initTime
-        timer?.schedule(object : TimerTask() {
-            override fun run() {
-                handler.post {
-                    count++
-                    val mm = count * 100 / 1000 / 60
-                    val ss = count * 100 / 1000 % 60
-                    timerText.text = String.format(Locale.US, "%1$02d:%2$02d", mm, ss)
-                }
+        timer = Timer().apply { schedule(0, 100, {
+            handler.post {
+                count++
+                val mm = count * 100 / 1000 / 60
+                val ss = count * 100 / 1000 % 60
+                timerText.text = String.format(Locale.US, "%1$02d:%2$02d", mm, ss)
             }
-        }, 0, 100)
+        }) }
+        timerText.text = initTime
         isRunning = true
+        count = 0
     }
 
     fun reset() {
         timer?.cancel()
         timer = null
         timerText.text = initTime
-
         charBoxes.forEach { charBox -> charBox.reset() }
-
         isRunning = false
         clear = false
     }

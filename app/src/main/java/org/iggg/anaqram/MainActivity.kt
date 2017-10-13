@@ -21,7 +21,6 @@ import com.google.android.gms.vision.barcode.Barcode
 
 class MainActivity : AppCompatActivity() {
     data internal class Model(val gameManager: GameManager, val charBoxMapper: CharBoxMapper)
-
     private var model: Model? = null
     private var barcodeDetectorManager: BarcodeDetectorManager? = null
 
@@ -34,15 +33,15 @@ class MainActivity : AppCompatActivity() {
         val barcodeInfo = findViewById(R.id.code_info) as TextView
 
         startButton.setOnClickListener {
-            model!!.let {
-                if (it.gameManager.isRunning) {
-                    it.gameManager.reset()
-                    it.charBoxMapper.shuffle()
-                    it.charBoxMapper.updateChar()
+            model!!.run {
+                if (gameManager.isRunning) {
+                    gameManager.reset()
+                    charBoxMapper.shuffle()
+                    charBoxMapper.updateChar()
                     barcodeInfo.text = getString(R.string.please_start)
                     startButton.text = getString(R.string.start)
                 } else {
-                    it.gameManager.start()
+                    gameManager.start()
                     barcodeInfo.text = getString(R.string.please_scan)
                     startButton.text = getString(R.string.reset)
                 }
@@ -54,22 +53,22 @@ class MainActivity : AppCompatActivity() {
         /* 中央部のカメラを描画 */
         val cameraView = findViewById(R.id.camera_view) as SurfaceView
         barcodeDetectorManager = BarcodeDetectorManager(cameraView, this)
-        barcodeDetectorManager!!.setProcessor(object : Detector.Processor<Barcode> {
-            override fun release() {}
-
-            override fun receiveDetections(detections: Detector.Detections<Barcode>) {
-                val barcode = detections.detectedItems
-                model!!.let {
-                    if (barcode.size() != 0 && it.gameManager.isRunning) {
-                        barcodeInfo.post {
-                            val qrText = barcode.valueAt(0).displayValue
-                            barcodeInfo.text = it.gameManager.displayChar(qrText)
-                            it.charBoxMapper.updateChar()
+            .apply {
+                setProcessor(object : Detector.Processor<Barcode> {
+                    override fun release() = Unit
+                    override fun receiveDetections(detections: Detector.Detections<Barcode>) =
+                        model!!.run {
+                            val barcode = detections.detectedItems
+                            if (barcode.size() != 0 && gameManager.isRunning) {
+                                barcodeInfo.post {
+                                    val qrText = barcode.valueAt(0).displayValue
+                                    barcodeInfo.text = gameManager.displayChar(qrText)
+                                    charBoxMapper.updateChar()
+                                }
+                            }
                         }
-                    }
-                }
+                })
             }
-        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -112,36 +111,32 @@ class MainActivity : AppCompatActivity() {
     private fun updateSetting() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val timerText = findViewById(R.id.timer) as TextView
+        /* 上部のボタン文字列を描画 */
+        val buttonArea =
+            (findViewById(R.id.buttonArea) as LinearLayout).apply { removeAllViews() }
 
         val gameManager = GameManager(prefs.getString("answer", ""), timerText)
-
-        /* 上部のボタン文字列を描画 */
-        val buttonArea = findViewById(R.id.buttonArea) as LinearLayout
-
         val charBoxMapper = CharBoxMapper(this, gameManager.charBoxes, { str ->
             gameManager.accept(str)?.let { toastMake(it, 0, 0) }
-        })
-        charBoxMapper.shuffle()
-        charBoxMapper.updateChar()
-
-        buttonArea.removeAllViews()
-        charBoxMapper.buttons.forEach { button -> buttonArea.addView(button) }
-
+        }).apply {
+            shuffle()
+            updateChar()
+            buttons.forEach { button -> buttonArea.addView(button) }
+        }
         model = Model(gameManager, charBoxMapper)
     }
 
-    private fun toastMake(message: String?, x: Int, y: Int) {
-        val text = TextView(this)
-        text.text = message
-        text.textSize = 50f
-        text.setTextColor(Color.WHITE)
-        text.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary))
-
-        val toast = Toast(this)
-        toast.setGravity(Gravity.CENTER, x, y)
-        toast.duration = Toast.LENGTH_LONG
-        toast.view = text
-
-        toast.show()
-    }
+    private fun toastMake(message: String?, x: Int, y: Int) =
+        Toast(this)
+            .apply { setGravity(Gravity.CENTER, x, y) }
+            .apply { duration = Toast.LENGTH_LONG }
+            .also { toast ->
+                toast.view = TextView(this)
+                    .also {
+                        it.text = message
+                        it.textSize = 50f
+                        it.setTextColor(Color.WHITE)
+                        it.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary))
+                    }
+            }.show()
 }

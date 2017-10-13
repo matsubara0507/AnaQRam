@@ -2,7 +2,6 @@ package org.iggg.anaqram
 
 import android.content.Context
 import android.graphics.Color
-import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 
@@ -20,34 +19,36 @@ internal class CharBoxMapper(context: Context, charBoxes: List<CharBox>, clear: 
         get() = buttons.fold("", { acc, button -> acc + button.text })
 
     init {
-        buttons.zip(charBoxes).forEach {
-            (button, index) -> charBoxMap.put(button, index)
-        }
-        for (button in buttons) {
-            val buttonLayoutParams = LinearLayout.LayoutParams(150, 150)
-            button.layoutParams = buttonLayoutParams
-            button.textSize = 30f
-            val listener = View.OnClickListener { v ->
-                this.swapCharBox(v as Button)
-                clear(this.currentString)
+        buttons
+            .apply {
+                zip(charBoxes).forEach { (button, index) -> charBoxMap.put(button, index) }
             }
-            button.setOnClickListener(listener)
-        }
+            .forEach { button ->
+                button
+                    .apply { layoutParams = LinearLayout.LayoutParams(150, 150) }
+                    .apply { textSize = 30f }
+                    .apply {
+                        setOnClickListener {
+                            swapCharBox(it as Button)
+                            clear(currentString)
+                        }
+                    }
+            }
     }
 
-    private fun swapCharBox(button: Button) {
+    private fun swapCharBox(button: Button) =
         charBoxMap[clickedButton]?.let { clickedCharBox ->
             charBoxMap[button]?.let { charBox ->
                 charBoxMap.put(button, clickedCharBox)
                 charBoxMap.put(clickedButton, charBox)
-                clickedButton.setTextColor(Color.BLACK)
-                clickedButton = unUseButton
+                setClickedButton(unUseButton)
                 updateChar()
             }
-            return
-        }
-        button.setTextColor(Color.RED)
-        clickedButton = button
+        } ?: setClickedButton(button)
+
+    private fun setClickedButton(button: Button) {
+        clickedButton.setTextColor(Color.BLACK)
+        clickedButton = button.apply { setTextColor(Color.RED)}
     }
 
     fun updateChar() =
@@ -55,10 +56,12 @@ internal class CharBoxMapper(context: Context, charBoxes: List<CharBox>, clear: 
 
     fun shuffle() {
         val currentCharBoxes = charBoxMap.values.toTypedArray()
-        val indexes = buttons.mapIndexed { index, _ -> index  }
-        Collections.shuffle(indexes)
-        buttons.zip(indexes).forEach { (button, index) ->
-            charBoxMap.put(button, currentCharBoxes[index])
-        }
+        buttons
+            .mapIndexed { index, _ -> index }
+            .also(Collections::shuffle)
+            .zip(buttons)
+            .forEach { (index, button) ->
+                charBoxMap.put(button, currentCharBoxes[index])
+            }
     }
 }
