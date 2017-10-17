@@ -121,8 +121,14 @@ class MainActivity : AppCompatActivity() {
             (findViewById(R.id.buttonArea) as LinearLayout).apply { removeAllViews() }
 
         val gameManager = GameManager(prefs.getString("answer", ""), timerText)
-        val charBoxMapper = CharBoxMapper(this, gameManager.charBoxes, { str ->
-            gameManager.accept(str)?.let { toastMake(it, 0, 0) }
+        val charBoxMapper = CharBoxMapper(this, gameManager.charBoxes, { str, swapCount ->
+            gameManager.accept(str)?.let {
+                toastMake(it, 0, 0)
+                val score = ScoreAPI.Score(gameManager.answer.length, gameManager.second(), swapCount)
+                ScoreAPI("http://anaqram.iggg.org").postScore(score, { _, _, _ ->
+                    Unit
+                })
+            }
         }).apply {
             shuffle()
             updateChar()

@@ -12,7 +12,7 @@ internal class GameManager(val answer: String, private val timerText: TextView) 
     var isRunning = false
         private set
     private var timer: Timer? = null
-    private var count: Long = 0
+    private var timeCount: Long = 0
     private var clear = false
 
     companion object {
@@ -43,15 +43,15 @@ internal class GameManager(val answer: String, private val timerText: TextView) 
         timer?.cancel()
         timer = Timer().apply { schedule(0, 100, {
             handler.post {
-                count++
-                val mm = count * 100 / 1000 / 60
-                val ss = count * 100 / 1000 % 60
+                timeCount++
+                val mm = timeCount * 100 / 1000 / 60
+                val ss = timeCount * 100 / 1000 % 60
                 timerText.text = String.format(Locale.US, "%1$02d:%2$02d", mm, ss)
             }
         }) }
         timerText.text = initTime
         isRunning = true
-        count = 0
+        timeCount = 0
     }
 
     fun reset() {
@@ -62,4 +62,6 @@ internal class GameManager(val answer: String, private val timerText: TextView) 
         isRunning = false
         clear = false
     }
+
+    fun second(): Int = (timeCount * 100 / 1000).toInt()
 }
