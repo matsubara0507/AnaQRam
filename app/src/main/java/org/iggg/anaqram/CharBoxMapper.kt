@@ -8,9 +8,10 @@ import android.widget.LinearLayout
 import java.util.Collections
 import java.util.HashMap
 
-internal class CharBoxMapper(context: Context, charBoxes: List<CharBox>, clear: (String) -> Unit) {
+internal class CharBoxMapper(context: Context, charBoxes: List<CharBox>, clear: (String, Int) -> Unit) {
     private val unUseButton: Button = Button(context)
     private var clickedButton: Button = unUseButton
+    private var swapCount: Int = 0
 
     val buttons: List<Button> = charBoxes.map { Button(context) }
     private val charBoxMap: HashMap<Button, CharBox> = HashMap(charBoxes.size)
@@ -30,7 +31,7 @@ internal class CharBoxMapper(context: Context, charBoxes: List<CharBox>, clear: 
                     .apply {
                         setOnClickListener {
                             swapCharBox(it as Button)
-                            clear(currentString)
+                            clear(currentString, swapCount)
                         }
                     }
             }
@@ -43,6 +44,7 @@ internal class CharBoxMapper(context: Context, charBoxes: List<CharBox>, clear: 
                 charBoxMap.put(clickedButton, charBox)
                 setClickedButton(unUseButton)
                 updateChar()
+                swapCount++
             }
         } ?: setClickedButton(button)
 
