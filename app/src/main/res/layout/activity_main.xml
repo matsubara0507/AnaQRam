@@ -22,13 +22,22 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <LinearLayout
-        android:id="@+id/buttonArea"
-        android:orientation="horizontal"
+    <HorizontalScrollView
+        android:id="@+id/horizontalScrollView"
         android:layout_width="wrap_content"
-        android:layout_height="70dp"
-        android:layout_gravity="center|top"
-        android:layout_marginTop="80dp" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        >
+
+        <LinearLayout
+            android:id="@+id/buttonArea"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="70dp"
+            android:layout_marginTop="80dp"
+            />
+
+    </HorizontalScrollView>
 
     <SurfaceView
         android:layout_width="300dp"

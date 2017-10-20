@@ -25,6 +25,15 @@
   - スタートするとリセットボタンに変わる
   - リセットボタンを押すと全てリセットされる
 
+#### Version 2
+
+- スコアランキングのサーバーにクリア後スコアをポストする
+    - 答えの文字数・クリアタイム・入れ替え回数
+- ボタン配置を横スクロールするようにした
+    - 実質的に文字制限が無くなった
+- BUGFIX: QRコード見つけたときに文字列が合っていてもクリアにならない
+- BUGFIX: クリア後に設定を変えるとクリアタイムあたりがおかしい
+
 ## 参照
 
 - QRコードの読み取り
@@ -42,3 +51,6 @@
   - http://blog.fujiu.jp/2013/11/14-android-toast.html
 - タイマー
   - https://akira-watson.com/android/timertask.html
+- 横スクロール
+  - https://akira-watson.com/android/horizontal-scrollview.html
+  - 中央にしたい: https://stackoverflow.com/questions/5478502/horizontalscrollview-with-centered-elements
