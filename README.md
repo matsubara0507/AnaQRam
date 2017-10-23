@@ -6,6 +6,22 @@
   - 全て見える状態で並び替えるて答えの文字列を作る
 - IGGGのイベントのために作る
 
+## 遊び方
+
+QRコードをスキャンして
+![](/img/anaqram1.gif)
+
+文字を並び替えて単語を作る(アナグラム)
+![](/img/anaqram2.gif)
+
+QRコードは `img/qrcodes` に置いてある．
+
+### 依存するアプリなど
+
+- [Google Play開発者サービス](https://play.google.com/store/apps/details?id=com.google.android.gms&hl=ja): QRコードをこれでスキャン
+- [Google 日本語入力](https://play.google.com/store/apps/details?id=com.google.android.inputmethod.japanese&hl=ja): 日本語の答えを入力するのに必要
+- WiFi: インターネットに接続されてないとスコアのポストができない
+
 ## 機能
 
 - QRコードは数字(0,1,2...)
