@@ -125,7 +125,7 @@ class MainActivity : AppCompatActivity() {
             gameManager.accept(str)?.let {
                 toastMake(it, 0, 0)
                 val score = ScoreAPI.Score(gameManager.answer.length, gameManager.second(), swapCount)
-                ScoreAPI("http://anaqram.iggg.org").postScore(score, { _, _, _ ->
+                ScoreAPI("http://anaqram.iggg.org").postScores(score, { _, _, _ ->
                     Unit
                 })
             }

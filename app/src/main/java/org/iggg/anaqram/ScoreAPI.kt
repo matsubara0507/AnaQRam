@@ -10,7 +10,6 @@ import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 
 class ScoreAPI(private val baseURL: String) {
-    data class Score(val textLength: Int, val clearTime: Int, val swapCount: Int)
 
     init {
         FuelManager.instance.apply {
@@ -19,11 +18,17 @@ class ScoreAPI(private val baseURL: String) {
         }
     }
 
+    data class Score(val textLength: Int, val clearTime: Int, val swapCount: Int)
+
     fun getScores(handler: (Request, Response, Result<List<Score>, FuelError>) -> Unit) {
-        Fuel.get("/scores").responseObject(handler)
+        Fuel.get("/" + "scores")
+            .responseObject(handler)
     }
 
-    fun postScore(score: Score, handler: (Request, Response, Result<Score, FuelError>) -> Unit) {
-        Fuel.post("/scores").body(Gson().toJson(score, Score::class.java)).responseObject(handler)
+    fun postScores(body: Score, handler: (Request, Response, Result<Score, FuelError>) -> Unit) {
+        Fuel.post("/" + "scores")
+            .body(Gson().toJson(body, Score::class.java))
+            .responseObject(handler)
     }
+
 }
